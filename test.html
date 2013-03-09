@@ -1,0 +1,441 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		
+		<title>DataTables example</title>
+		<style type="text/css" title="currentStyle">
+			@import "css/demo_page.css";
+			@import "css/demo_table.css";
+		</style>
+<script type="text/javascript" language="javascript" src="js/jquery.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery.jeditable.js"></script>
+<script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
+<script  src="js/jquery.tmpl.js"></script>
+<!--
+<script  src="js/izzyColor.js"></script>
+-->
+<script  src="js/jquery.simple-color.js?001"></script>
+<script  src="js/SQLike.js"></script>
+<script id="edit_header_tmpl" type="text/x-jquery-tmpl">
+    <h4>id: ${id}, type: ${type}, name: ${name}</h4>
+</script>
+<script id="edit_fields_tmpl" type="text/x-jquery-tmpl">
+    <tr>
+			<td><input type="text" value="${key}">:
+			</td>
+			<td><input type="text" value="${value}">
+			</td>
+			<td><input type="text" value="${color}" class="simple_color" id="color${key}${value}">
+			</td>
+    </tr>
+</script>
+	</head>
+	<body id="dt_example">
+			<td><input type="text" value="#FFCC88" class="izzyColor" id="abcde">
+<div>
+	<button onClick="javascript:test123()">test123</button>
+	<button  onClick="javascript:add_item_field()">
+	Add field
+	</button>
+	<button onClick="javascript:save_item()">
+	Save
+	</button>
+<div id="item">
+	<table>
+	<thead>
+		<tr><th colspan=2 id="edit_header_div"></th></tr>
+		<tr>
+			<th><u>Field</u><th><u>Value</u><th><u>color</u>
+		</tr>
+	</thead>
+	<tbody id="edit_fields_div">
+	</tbody>
+
+	</table>
+</div>
+<script type="text/javascript" charset="utf-8">
+
+function test123() {
+	/* Apply the jEditable handlers to the table */
+	/*
+			<button onClick="javascript:edit_field_meta( this, ${index}, 'color')">color</button>
+	oTable.$('td').editable( 'test.php', {
+	  indicator : 'Saving...',
+		tooltip   : 'Click to edit...',
+		placeholder : "", 
+		"callback": function( sValue, y ) {
+			var aPos = oTable.fnGetPosition( this );
+			oTable.fnUpdate( sValue, aPos[0], aPos[1] );
+		},
+		"submitdata": function ( value, settings ) {
+			return {
+				"row_id": this.parentNode.getAttribute('id'),
+				"column": oTable.fnGetPosition( this )[2]
+			};
+		},
+		"height": "14px",
+		"width": "100%"
+	} );
+	*/
+
+			/*
+	oTable.$('tr').click( function() {
+		var rowIndex2 = $(this)[0].sectionRowIndex;
+		//edit_item( items_txt["items"][rowIndex2]);
+		var id = $(this).find('td:first').text() - 1;
+		item_editing = id;
+		var item_copy = items_txt["items"][id];
+		edit_item( item_copy);
+    console.debug( "item_editing: " + item_editing);
+    console.debug( items_txt["items"][item_editing] );
+		
+
+		var rowIndex3 = $(this).closest('tr')[0].sectionRowIndex;
+		var rowIndex = $(this)
+    	.closest('tr') // Get the closest tr parent element
+    	.prevAll() // Find all sibling elements in front of it
+    	.length;
+
+    console.debug( rowIndex);
+    console.debug( rowIndex2);
+    console.debug( rowIndex3);
+    console.debug( $('td', this.parentNode).index(this));
+    var iCol = $('td', this.parentNode).index(this) % 5;
+    $('td:nth-child('+(iCol+1)+')', oTable.$('tr')).addClass( 'highlighted' );
+	  }, function() {
+	      oTable.$('td.highlighted').removeClass('highlighted');
+	} );
+	  */
+}
+
+var item_editing = -1;
+var items_txt = load_json( "items.txt");
+var meta_txt = load_json( "meta.txt");
+var rels = new Array();
+/*
+$.each(
+	items_txt["items"],
+	function( intIndex, objValue ){
+		$.each( objValue,
+			function( intIndex2, objValue2 ){
+				console.debug( "i/i2/v = " + intIndex + ", " + intIndex2 + ", " + objValue2);
+				//item_columns[intIndex2]++;
+			}
+		);
+	}
+);
+*/
+
+var items_columns = get_keys2_freq( items_txt["items"]);
+
+function save_item( item) {
+  //console.debug( "items before"); console.debug( items_txt["items"]);
+	
+	$( "#edit_fields_div" ).find('tr').each(function(){
+		var field = $(this).find('td:first input:first').val();
+		var value = $(this).find('td:eq(1) input:first').val();
+		var color = $(this).find('td:eq(2) input:first').val();
+		console.debug( "f/v/c = " + field + ", " + value+", "+color);
+		items_txt["items"][item_editing][field] = value;
+		save_field_meta( items_txt["items"][item_editing]["type"], field, value, 'color', color);
+	});
+
+  //console.debug( "items after"); console.debug( items_txt["items"]);
+	load_new_table( items_txt["items"], gen_dt_columns( get_keys2_freq( items_txt["items"])));
+}
+
+function get_field_meta( type, field, value, meta_field) {
+	//console.debug( "get_field_meta(): type: "+type+", field:"+field+", value:"+value+", meta_field:"+meta_field);
+	
+	var meta_field_value = "";
+       //Select: [function(){return this[meta_field]} ],
+	var sql_result = SQLike.q(
+   {
+       Select: [meta_field],
+       From: meta_txt["meta_fields"],
+       Where: function(){return this.type==type && this.field==field && this.value==value}
+   })
+	console.debug( "undefined or empty?");
+
+	console.debug( sql_result);
+	if ( sql_result.length > 0 && meta_field in sql_result[0]) meta_field_value = sql_result[0][meta_field];
+	return meta_field_value;
+}
+
+function save_field_meta( type, field, value, meta_field, meta_field_value) {
+	// First see if it already exists:
+	console.debug( "save_field_meta(): type: "+type+", field:"+field+", value:"+value+", meta_field:"+meta_field+", meta_field_value:"+meta_field_value);
+	if ( meta_field_value == "") {
+		// Should we return straight away, or delete this meta field?
+		//console.debug( "save_field_meta(): meta_field_value empty, returning");
+	}
+	var update_result = SQLike.q(
+	    {
+	        Update: meta_txt["meta_fields"],
+	        Set: function(){this[meta_field]=meta_field_value},
+	        Where: function(){return this.type==type && this.field==field && this.value==value}
+	    }
+	)
+	//console.debug( "NOTE");
+	//console.debug( update_result);
+	
+	if ( get_field_meta( type, field, value, meta_field) != meta_field_value) {
+		// Update was unsuccesful, doing insert instead then
+		var new_row = new Array();
+		new_row["type"] = type;
+		new_row["field"] = field;
+		new_row["value"] = value;
+		new_row[meta_field] = meta_field_value;
+	
+		var insert_result = SQLike.q(
+		    {
+		        InsertInto: meta_txt["meta_fields"],
+		        Values: new_row
+		    }
+		)
+		console.debug( "NOTE");
+		console.debug( insert_result);
+	}
+}
+
+
+function gen_dt_columns ( arr) {
+	console.debug( arr);
+	var dt_columns = new Array();
+	for (key in arr) {
+		dt_columns.push( 
+			{ "mData": key, 
+        "sDefaultContent": "", 
+    		"sTitle": key,
+				"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+         	//$(nTd).css('border-left', ' 5px solid red')
+					//console.debug( "nTd, sData, oData, iRow, iCol, key = " + nTd +", " + sData  +", " + oData  +", " + iRow  +", " + iCol+", " +key);
+					// It's 2 am and I don't understand why dt_columns[iCol].mData here works
+					// and simply putting 'key' instead doesn't work...?
+        	var meta_field_value = get_field_meta( items_txt["items"][iRow]["type"], dt_columns[iCol].mData, sData, 'color');
+					if ( meta_field_value != "" ) {
+          	$(nTd).css('border-left', ' 5px solid ' + meta_field_value)
+        }
+			}
+		});
+	}
+	//console.debug( dt_columns);
+	return dt_columns;
+
+/*
+"aoColumns": [
+		  { "mData": "id" },
+			{ "mData": "type" },
+			{ "mData": "name" },
+			{ "mData": "tags", "sDefaultContent": "" },
+			{ "mData": "a", "sDefaultContent": "" }
+			]
+*/
+}
+
+function edit_item( item_index) {
+	item_editing = item_index;
+	var item_copy = items_txt["items"][item_index];
+
+	console.debug( item_index);
+	console.debug( item_copy);
+	$( "#edit_header_div" ).empty();
+	$( "#edit_fields_div" ).empty();
+
+	$( "#edit_header_tmpl" ).tmpl( item_copy).appendTo( "#edit_header_div" );
+	//delete item_copy["id"];
+	var item_type = item_copy["type"];
+	
+
+	for (key in item_copy) {
+		if ( key == "id") { continue; }
+		var i = { "key": key, "value": item_copy[key], "color": get_field_meta( item_type, key, item_copy[key], 'color') }
+		$( "#edit_fields_tmpl" ).tmpl( i).appendTo( "#edit_fields_div" );
+	}
+
+	//izzyColor();
+	$('.simple_color').simpleColor();
+	
+}
+
+function get_keys2_freq( obj) {
+	// Returns frequency of second level array keys:
+	// Example: ({id:8, type:8, name:8, tags:1})
+	var freqs = {};
+	for( var key in obj){
+		//console.debug( "key = " + key);
+		for( var key2 in obj[key]){
+			//console.debug( "key2 = " + key2);
+			if ( key2 in freqs) freqs[key2]++;
+			else freqs[key2] = 1;
+		}
+	}
+	return freqs;
+}
+
+
+console.debug( items_columns);
+function add_item_field() {
+		$( "#edit_fields_tmpl" ).tmpl( { "key": "", "value": ""} ).appendTo( "#edit_fields_div" );
+}
+
+function load_new_table( aaData, aoColumns) {
+	/*
+	oTable.fnDestroy();
+	*/
+	if (typeof oTable.fnClearTable !== "undefined") {
+		oTable.fnClearTable();
+		oTable.fnDestroy();
+		delete oTable;
+	}
+
+	$("#datatable").html( $("#table_template").html() );
+	//$("#example thead").empty();
+
+	aoColumns.unshift( { "mData": "action", "sDefaultContent": "", "sTitle": "Action"  });
+	var data_plus_action = JSON.parse(JSON.stringify( aaData));
+	for( var index in data_plus_action){
+		data_plus_action[index].action = "<a class='table_link' href='javascript:edit_item("+index+")'>edit</a>";
+	};
+	
+
+	oTable = $('#datatable table').dataTable({
+			iDisplayLength: 100,
+			"bDestroy": true,
+			"aaData": data_plus_action,
+			"aoColumns": aoColumns,
+			"fnDrawCallback": function( oSettings ) {
+				console.debug( 'DataTables has redrawn the table' );
+			}	});
+	
+}
+/*
+			"bDestroy": true,
+			"aoColumnDefs": [
+				{ "sDefaultContent": "", "aTargets": "_all" }
+			],
+*/
+
+// MAIN () _________________________
+
+var oTable = new Array();
+$(document).ready(function() {
+	main();
+} );
+
+function main(){
+	/* Init DataTables */
+
+	$("#datatable").html( $("#table_template").html() );
+	//$("#example thead").empty();
+
+	load_new_table( items_txt["items"], gen_dt_columns( get_keys2_freq( items_txt["items"])));
+			/*
+	oTable = $('#datatable table').dataTable({
+			"sAjaxSource": "browsers.txt", 
+			"sAjaxDataProp": "aaData",
+			"aoColumns": [
+			  { "mData": "id" },
+				{ "mData": "browser" },
+				{ "mData": "platform" },
+				{ "mData": "version" },
+				{ "mData": "grade" }
+				]
+			iDisplayLength: 100,
+			aaData: items_txt["items"],
+			"aoColumns": gen_dt_columns( get_keys2_freq( items_txt["items"])),
+ [
+			  { "mData": "id" },
+				{ "mData": "type" },
+				{ "mData": "name" },
+				{ "mData": "tags", "sDefaultContent": "" }
+				],
+			"aoColumnDefs": [
+				{ "sDefaultContent": "", "aTargets": "_all" }
+			],
+			"aoColumnDefs": "_all",
+			"aoColumns": [
+			  { "mData": "id" },
+				{ "mData": "type" },
+				{ "mData": "tags", "sDefaultContent": "" },
+				{ "mData": "name" }
+				],
+			"fnDrawCallback": function( oSettings ) {
+				console.debug( 'DataTables has redrawn the table' );
+			}
+	});
+*/
+
+ 	test123(); 
+}
+
+
+/*
+   alert(propt + ': ' + obj[propt]);
+console.debug( "items_columns = " + items_columns);
+console.debug(              load_json( "items.txt") );
+console.debug( $.parseJSON( '{"name":"John"}'     ) );
+console.debug( $.parseJSON( load_json( "items.txt")));
+*/
+
+function load_json(url) {
+	var json = null;
+	$.ajax({
+	    'async': false,
+	    'global': false,
+	    'url': url,
+	    'dataType': "json",
+	    'success': function (data) {
+	        json = data;
+	    }
+	});
+	return json;
+}
+
+		</script>
+
+<div id="table_template">
+
+<table cellpadding="0" cellspacing="0" border="0" class="display">
+	<thead>
+	</thead>
+	<tbody>
+	</tbody>
+	<tfoot>
+	</tfoot>
+</table>
+
+</div>
+<div id="datatable">
+
+<table cellpadding="0" cellspacing="0" border="0" class="display">
+	<thead>
+	</thead>
+	<tbody>
+	</tbody>
+	<tfoot>
+	</tfoot>
+</table>
+
+</div>
+
+
+</div>
+
+<div id="manage fields">
+	
+</div>
+
+<!--
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
+		<tr>
+			<th>Rendering engine</th>
+			<th>Browser</th>
+			<th>Platform(s)</th>
+			<th>Engine version</th>
+			<th>CSS grade</th>
+		</tr>
+-->
+</body>
+</html>
