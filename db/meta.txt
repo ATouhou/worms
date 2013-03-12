@@ -1,0 +1,76 @@
+{
+    "meta_fields": [
+        {
+            "type": "database",
+            "field": "type",
+            "value": "database",
+            "color": "#00ffff"
+        },
+        {
+            "type": "database",
+            "field": "visibility",
+            "value": "dev",
+            "color": "#0000FF"
+        },
+        {
+            "type": "database",
+            "field": "visibility",
+            "value": "live",
+            "color": "#FF0000"
+        },
+        {
+            "type": "server",
+            "field": "SLA",
+            "value": "99",
+            "color": "#880000"
+        },
+        {
+            "type": "server",
+            "field": "SLA",
+            "value": "99.9",
+            "color": "#BB0000"
+        },
+        {
+            "type": "server",
+            "field": "SLA",
+            "value": "99.999",
+            "color": "#EE0000"
+        },
+        {
+            "type": "server",
+            "field": "type",
+            "value": "server",
+            "color": "#ffff00"
+        },
+        {
+            "type": "animal",
+            "field": "food",
+            "value": "corn",
+            "color": "#ffff00"
+        },
+        {
+            "type": "animal",
+            "field": "food",
+            "value": "vegetarion",
+            "color": "#006633"
+        },
+        {
+            "type": "animal",
+            "field": "food",
+            "value": "meat",
+            "color": "#ff0033"
+        },
+        {
+            "type": "animal",
+            "field": "species",
+            "value": "pig",
+            "color": "#ff6699"
+        },
+        {
+            "type": "animal",
+            "field": "species",
+            "value": "horse",
+            "color": "#cc9966"
+        }
+    ]
+}

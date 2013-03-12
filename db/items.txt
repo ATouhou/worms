@@ -1,0 +1,14 @@
+{
+	"items": [
+		{ "id": "1", "type": "animal", "name": "piggy1", "food": "corn" },
+		{ "id": "2", "type": "animal", "name": "piggy2", "food": "meat" },
+		{ "id": "3", "type": "animal", "name": "horse1", "food": "carrots" },
+		{ "id": "4", "type": "animal", "name": "horse2", "food": "gluten free food" },
+		{ "id": "5", "type": "animal", "name": "horse3", "food": "vegetarion" },
+		{ "id": "6", "type": "animal", "name": "chickens", "food": "vegetarion" },
+		{ "id": "7", "type": "animal", "name": "ducks", "food": "corn" },
+		{ "id": "8", "type": "building", "name": "chicken-coup", "roof": "pine" },
+		{ "id": "9", "type": "building", "name": "the large barn", "roof": "thatched" },
+		{ "id": "10", "type": "building", "name": "the small barn", "roof": "tiled" }
+	]
+}

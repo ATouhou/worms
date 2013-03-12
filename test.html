@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		
-		<title>DataTables example</title>
+		<title>WORMS - demo</title>
 		<style type="text/css" title="currentStyle">
 			@import "css/demo_page.css";
 			@import "css/demo_table.css";
@@ -15,7 +15,7 @@
 <!--
 <script  src="js/izzyColor.js"></script>
 -->
-<script  src="js/jquery.simple-color.js?001"></script>
+<script  src="js/jquery.simple-color.js?002"></script>
 <script  src="js/SQLike.js"></script>
 <script id="edit_header_tmpl" type="text/x-jquery-tmpl">
     <h4>id: ${id}, type: ${type}, name: ${name}</h4>
@@ -41,7 +41,26 @@
 	<button onClick="javascript:save_item()">
 	Save
 	</button>
-<div id="item">
+	For this type:
+	<button onClick="javascript:()">
+	Add popular fields
+	</button>
+	<button onClick="javascript:()">
+	Add all known fields
+	</button>
+<div id="relations_left" style='float: left'>
+	<table>
+	<thead>
+		<tr><th colspan=2 id="relation_div"></th></tr>
+		<tr>
+			<th><u>Item<th><u>Relation to this item</u>
+		</tr>
+	</thead>
+	<tbody id="relations_left_rows">
+	</tbody>
+	</table>
+</div>
+<div id="item" style='float: left'>
 	<table>
 	<thead>
 		<tr><th colspan=2 id="edit_header_div"></th></tr>
@@ -51,9 +70,10 @@
 	</thead>
 	<tbody id="edit_fields_div">
 	</tbody>
-
 	</table>
 </div>
+Status: <span id='ajax_status'>___</span><br>
+
 <script type="text/javascript" charset="utf-8">
 
 function test123() {
@@ -110,9 +130,10 @@ function test123() {
 }
 
 var item_editing = -1;
-var items_txt = load_json( "items.txt");
-var meta_txt = load_json( "meta.txt");
-var rels = new Array();
+var items_txt = load_json( "db/items.txt");
+var meta_txt = load_json( "db/meta.txt");
+var rels_txt = load_json( "db/rels.txt");
+
 /*
 $.each(
 	items_txt["items"],
@@ -142,7 +163,20 @@ function save_item( item) {
 	});
 
   //console.debug( "items after"); console.debug( items_txt["items"]);
+  console.debug( "SAVING");
+	save_data();
 	load_new_table( items_txt["items"], gen_dt_columns( get_keys2_freq( items_txt["items"])));
+}
+
+function save_data() {
+	var url = 'db.php';
+  console.debug( "meta after"); console.debug( meta_txt);
+  console.debug( "meta after stringified"); console.debug( JSON.stringify( meta_txt, null, 4));
+	var posting = $.post( url, { "action": "save", "table_name": "meta", "rows": JSON.stringify( meta_txt, null, 4) } );
+	posting.done(function( data ) {
+	//var content = $( data ).find( '#content' );
+	$( "#ajax_status" ).html( data);
+	});
 }
 
 function get_field_meta( type, field, value, meta_field) {
@@ -156,9 +190,9 @@ function get_field_meta( type, field, value, meta_field) {
        From: meta_txt["meta_fields"],
        Where: function(){return this.type==type && this.field==field && this.value==value}
    })
-	console.debug( "undefined or empty?");
+	//console.debug( "undefined or empty?");
 
-	console.debug( sql_result);
+	//console.debug( sql_result);
 	if ( sql_result.length > 0 && meta_field in sql_result[0]) meta_field_value = sql_result[0][meta_field];
 	return meta_field_value;
 }
@@ -182,7 +216,7 @@ function save_field_meta( type, field, value, meta_field, meta_field_value) {
 	
 	if ( get_field_meta( type, field, value, meta_field) != meta_field_value) {
 		// Update was unsuccesful, doing insert instead then
-		var new_row = new Array();
+		var new_row = new Object();
 		new_row["type"] = type;
 		new_row["field"] = field;
 		new_row["value"] = value;

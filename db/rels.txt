@@ -1,0 +1,20 @@
+{
+    "relationships": [
+        { "id1": "1", "type": "lives in", "id2": "10" },
+        { "id1": "2", "type": "lives in", "id2": "10" },
+        { "id1": "3", "type": "lives in", "id2": "9" },
+        { "id1": "4", "type": "lives in", "id2": "9" },
+        { "id1": "5", "type": "lives in", "id2": "9" },
+        { "id1": "6", "type": "lives in", "id2": "8" },
+        { "id1": "7", "type": "lives in", "id2": "8" },
+        { "id1": "1", "type": "shares with", "id2": "2" },
+        { "id1": "3", "type": "shares with", "id2": "4" },
+        { "id1": "4", "type": "shares with", "id2": "5" },
+        { "id1": "1", "type": "smaller than", "id2": "2" },
+        { "id1": "2", "type": "smaller than", "id2": "3" },
+        { "id1": "3", "type": "smaller than", "id2": "4" },
+        { "id1": "4", "type": "smaller than", "id2": "5" },
+        { "id1": "5", "type": "smaller than", "id2": "6" },
+        { "id1": "7", "type": "smaller than", "id2": "6" }
+    ]
+}

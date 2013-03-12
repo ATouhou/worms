@@ -142,7 +142,8 @@
 				'height':          options.boxHeight,
 				// Make sure that the code is vertically centered.
 				'line-height':     options.boxHeight,
-				'cursor':          'pointer'
+				'cursor':          'pointer',
+				'z-index':					9999
 			});
       container.append(display_box);
       
@@ -151,7 +152,8 @@
         display_box.text(this.value);
         display_box.css({
           'color':     options.colorCodeColor,
-        	'textAlign': options.colorCodeAlign
+        	'textAlign': options.colorCodeAlign,
+					'z-index':					9999
         });
       }
       
@@ -173,7 +175,8 @@
 			      'height':   options.totalHeight,
 						'top':      0,
 						'left':     options.boxWidth,
-						'position': 'absolute'
+						'position': 'absolute',
+						'z-index':					9999
 					});
       
           event.data.container.chooser = chooser;
